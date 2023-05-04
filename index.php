@@ -1,4 +1,21 @@
 <?php
+function filter_hotels($hotels, $filter)
+{
+    if ($filter === 'all') {
+        return $hotels;
+    }
+
+    $filtered_hotels = [];
+
+    foreach ($hotels as $hotel) {
+        if (($filter === 'yes' && $hotel['parking']) || ($filter === 'no' && !$hotel['parking'])) {
+            $filtered_hotels[] = $hotel;
+        }
+    }
+
+    return $filtered_hotels;
+}
+
 $hotels = [
 
     [
@@ -37,7 +54,10 @@ $hotels = [
         'distance_to_center' => 50
     ],
 ];
-var_dump($hotels);
+
+$filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
+$filtered_hotels = filter_hotels($hotels, $filter);
+
 ?>
 
 <!DOCTYPE html>
@@ -53,7 +73,9 @@ var_dump($hotels);
 </head>
 
 <body>
-    <div class="container">
+    <div class="container my-5">
+
+        <!-- table -->
         <div class="table-responsive">
 
             <table class="table table-primary">
@@ -65,30 +87,45 @@ var_dump($hotels);
                         <th scope="col">Name:</th>
                         <th scope="col">Details:</th>
                         <th scope="col">Parking:</th>
-                        <th scope="col">Ranking:</th>
+                        <th scope="col">Vote:</th>
                         <th scope="col">City Center (km):</th>
                     </tr>
                 </thead>
 
                 <tbody>
 
-                    <!-- loop through each hotel -->
-                    <?php foreach ($hotels as $hotel) { ?>
+                    <!-- loop through each filtered hotel -->
+                    <?php foreach ($filtered_hotels as $hotel_array) { ?>
                         <tr>
-                            <th scope="row"><?php echo $hotel['name']; ?></th>
-                            <td><?php echo $hotel['description']; ?></td>
-                            <td><?php echo boolval($hotel['parking']) ? 'Yes' : 'No'; ?></td>
-                            <td><?php echo $hotel['vote']; ?></td>
-                            <td><?php echo $hotel['distance_to_center']; ?></td>
+                            <th scope="row"><?php echo $hotel_array['name']; ?></th>
+                            <td><?php echo $hotel_array['description']; ?></td>
+                            <td><?php echo boolval($hotel_array['parking']) ? 'Yes' : 'No'; ?></td>
+                            <td><?php echo $hotel_array['vote']; ?></td>
+                            <td><?php echo $hotel_array['distance_to_center']; ?></td>
                         </tr>
                     <?php } ?>
 
                 </tbody>
 
             </table>
-        
+
         </div>
     </div>
+
+    <!-- form -->
+    <form action="index.php" method="GET">
+        <div class="mb-1 container">
+            <label for="parking" class="form-label">Parking:</label>
+            <select name="filter">
+                <option value="all" <?php echo ($filter === 'all') ? 'selected' : ''; ?>>All</option>
+                <option value="yes" <?php echo ($filter === 'yes') ? 'selected' : ''; ?>>Parking</option>
+                <option value="no" <?php echo ($filter === 'no') ? 'selected' : ''; ?>>No Parking</option>
+            </select>
+
+            <br>
+            <button type="submit" class="btn btn-primary">Submit!</button>
+        </div>
+    </form>
 </body>
 
 </html>
